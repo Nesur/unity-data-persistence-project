@@ -6,14 +6,30 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     private Rigidbody m_Rigidbody;
+    private ColorHandler m_ColorHandler;
 
     void Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
+        m_ColorHandler= GetComponent<ColorHandler>();
+        switch (SettingsManager.Instance.BallColor)
+        {
+            case SettingsUIHandler.BallColor.RED:
+                m_ColorHandler.SetColor(Color.red);
+                break;
+            case SettingsUIHandler.BallColor.GREEN:
+                m_ColorHandler.SetColor(Color.green);
+                break;
+            case SettingsUIHandler.BallColor.BLUE:
+                m_ColorHandler.SetColor(Color.blue);
+                break;
+
+        }
     }
     
     private void OnCollisionExit(Collision other)
     {
+        float speed = MainManager.GetSpeedByDifficulty();
         var velocity = m_Rigidbody.velocity;
         
         //after a collision we accelerate a bit
@@ -31,6 +47,6 @@ public class Ball : MonoBehaviour
             velocity = velocity.normalized * 3.0f;
         }
 
-        m_Rigidbody.velocity = velocity;
+        m_Rigidbody.velocity = velocity * speed;    
     }
 }

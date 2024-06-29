@@ -6,15 +6,21 @@ using UnityEngine.UI;
 
 public class MainManager : MonoBehaviour
 {
+    private MainManager Instance;
+
+
+
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
 
     public Text ScoreText;
     public GameObject GameOverText;
+    public GameObject NewHightScoreText;
     
     private bool m_Started = false;
     private int m_Points;
+    private Color m_Color;
     
     private bool m_GameOver = false;
 
@@ -50,7 +56,7 @@ public class MainManager : MonoBehaviour
                 forceDir.Normalize();
 
                 Ball.transform.SetParent(null);
-                Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+                Ball.AddForce(forceDir * 2.0f * GetSpeedByDifficulty(), ForceMode.VelocityChange);
             }
         }
         else if (m_GameOver)
@@ -60,6 +66,28 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("Menu");
+        }
+    }
+
+
+    public static float GetSpeedByDifficulty()
+    {
+        if (SettingsManager.Instance != null)
+        {
+            switch (SettingsManager.Instance.Difficulty)
+            {
+                case SettingsUIHandler.Difficulty.EASY:
+                    return 1;
+                case SettingsUIHandler.Difficulty.MEDIUM:
+                    return 1.5f;
+                case SettingsUIHandler.Difficulty.HARD:
+                    return 2.5f;
+            }
+        }
+        return 1;
     }
 
     void AddPoint(int point)
@@ -72,5 +100,11 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if (SettingsManager.Instance.IsBestScoreBeaten(m_Points))
+        {
+            SettingsManager.Instance.StoreBestScore(m_Points);
+            SettingsManager.Instance.SaveSettings();
+            NewHightScoreText.SetActive(true);
+        }
     }
 }
